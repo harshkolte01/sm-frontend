@@ -132,7 +132,7 @@ const PostCard = ({
             <img
               src={post.image}
               alt="Post image"
-              className="max-w-md max-h-96 h-auto rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+              className="w-full max-w-full max-h-96 h-auto rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity object-cover"
               onClick={() => {
                 setSelectedImage(post.image);
                 setShowImageModal(true);

@@ -7,6 +7,13 @@
 /* Base styles */
 * {
   box-sizing: border-box;
+  max-width: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  touch-action: manipulation;
 }
 
 body {
@@ -16,6 +23,20 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+}
+
+/* Ensure images are responsive */
+img {
+  height: auto;
+  max-width: 100%;
+}
+
+/* Prevent zoom on input focus (iOS Safari) */
+input, textarea, select {
+  font-size: 16px;
 }
 
 code {
