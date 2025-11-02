@@ -111,8 +111,8 @@ src/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/harshkolte01/social-media-frontend.git
-   cd social-media-frontend
+   git clone https://github.com/harshkolte01/sm-frontend.git
+   cd sm-frontend
    ```
 
 2. **Install dependencies**
