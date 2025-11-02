@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { postsApi } from '../api/postsApi.js';
+import { useAuth } from '../hooks/useAuth.js';
 
 const PostForm = ({ onCreate }) => {
+  const { user } = useAuth();
   const [text, setText] = useState('');
   const [image, setImage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -129,11 +131,24 @@ const PostForm = ({ onCreate }) => {
   const remainingChars = MAX_CHARS - text.length;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex items-start space-x-4">
-          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
-            U
+          <div className="relative w-10 h-10">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={`${user.name}'s avatar`}
+                className="w-10 h-10 rounded-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div className={`w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium ${user?.avatar ? 'hidden' : ''}`}>
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
           </div>
           <div className="flex-1">
             <div>
@@ -145,10 +160,10 @@ const PostForm = ({ onCreate }) => {
                 value={text}
                 onChange={handleTextChange}
                 placeholder="What's on your mind?"
-                className={`w-full p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 ${
+                className={`w-full p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500  ${
                   error 
-                    ? 'border-red-300 dark:border-red-600 focus:ring-red-500' 
-                    : 'border-gray-300 dark:border-gray-600'
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-300'
                 }`}
                 rows="3"
                 maxLength={MAX_CHARS}
@@ -160,8 +175,8 @@ const PostForm = ({ onCreate }) => {
               <div className="flex justify-between items-center mt-2">
                 <div id="char-count" className={`text-sm ${
                   remainingChars < 50 
-                    ? 'text-red-500 dark:text-red-400' 
-                    : 'text-gray-500 dark:text-gray-400'
+                    ? 'text-red-500' 
+                    : 'text-gray-500'
                 }`}>
                   {remainingChars} characters remaining
                 </div>
@@ -170,13 +185,13 @@ const PostForm = ({ onCreate }) => {
 
             {/* Image Options */}
             <div className="mt-3 space-y-3">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-700">
                 Add Image (optional)
               </label>
               
               {/* Upload File Option */}
               <div className="flex items-center space-x-3">
-                <label className="flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
+                <label className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
@@ -199,9 +214,9 @@ const PostForm = ({ onCreate }) => {
 
               {/* OR Divider */}
               <div className="flex items-center">
-                <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
-                <span className="px-3 text-sm text-gray-500 dark:text-gray-400">or</span>
-                <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+                <div className="flex-1 border-t border-gray-300"></div>
+                <span className="px-3 text-sm text-gray-500">or</span>
+                <div className="flex-1 border-t border-gray-300"></div>
               </div>
 
               {/* Image URL Input */}
@@ -212,7 +227,7 @@ const PostForm = ({ onCreate }) => {
                   value={image}
                   onChange={handleImageChange}
                   placeholder="Paste image URL here..."
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 "
                   disabled={loading || uploading}
                 />
               </div>
@@ -223,7 +238,7 @@ const PostForm = ({ onCreate }) => {
                   <img
                     src={imagePreview || image}
                     alt="Preview"
-                    className="max-w-full h-auto max-h-64 rounded-lg border border-gray-200 dark:border-gray-700"
+                    className="max-w-full h-auto max-h-64 rounded-lg border border-gray-200 "
                     onError={(e) => {
                       e.target.style.display = 'none';
                       setImagePreview('');
@@ -248,8 +263,8 @@ const PostForm = ({ onCreate }) => {
 
             {/* Error Message */}
             {error && (
-              <div id="post-error" className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <div id="post-error" className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 

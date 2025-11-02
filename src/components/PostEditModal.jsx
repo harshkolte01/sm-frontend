@@ -130,8 +130,8 @@ const PostEditModal = ({ post, isOpen, onClose, onSave }) => {
   const remainingChars = MAX_CHARS - text.length;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+    <div
+      className="fixed inset-0 bg-gray-900 bg-opacity-20 flex items-center justify-center p-4 z-50"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -139,18 +139,18 @@ const PostEditModal = ({ post, isOpen, onClose, onSave }) => {
     >
       <div 
         ref={modalRef}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden"
+        className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 id="edit-post-title" className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 id="edit-post-title" className="text-lg font-semibold text-gray-900">
             Edit Post
           </h2>
           <button
             ref={closeButtonRef}
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded transition-colors"
+            className="text-gray-400 hover:text-gray-600  p-1 rounded transition-colors"
             aria-label="Close modal"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,7 +164,7 @@ const PostEditModal = ({ post, isOpen, onClose, onSave }) => {
           <div className="space-y-4">
             {/* Textarea */}
             <div>
-              <label htmlFor="edit-text" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="edit-text" className="block text-sm font-medium text-gray-700 mb-2">
                 Post Content
               </label>
               <textarea
@@ -172,10 +172,10 @@ const PostEditModal = ({ post, isOpen, onClose, onSave }) => {
                 id="edit-text"
                 value={text}
                 onChange={handleTextChange}
-                className={`w-full p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
+                className={`w-full p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500  ${
                   error 
-                    ? 'border-red-300 dark:border-red-600 focus:ring-red-500' 
-                    : 'border-gray-300 dark:border-gray-600'
+                    ? 'border-red-300 focus:ring-red-500' 
+                    : 'border-gray-300'
                 }`}
                 rows="6"
                 maxLength={MAX_CHARS}
@@ -187,8 +187,8 @@ const PostEditModal = ({ post, isOpen, onClose, onSave }) => {
               <div className="flex justify-between items-center mt-2">
                 <div id="edit-char-count" className={`text-sm ${
                   remainingChars < 50 
-                    ? 'text-red-500 dark:text-red-400' 
-                    : 'text-gray-500 dark:text-gray-400'
+                    ? 'text-red-500' 
+                    : 'text-gray-500'
                 }`}>
                   {remainingChars} characters remaining
                 </div>
@@ -197,18 +197,18 @@ const PostEditModal = ({ post, isOpen, onClose, onSave }) => {
 
             {/* Error Message */}
             {error && (
-              <div id="edit-error" className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <div id="edit-error" className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100  hover:bg-gray-200  rounded-lg transition-colors"
               disabled={isSubmitting}
             >
               Cancel

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ConfirmModal } from './ui';
 
 const PostCard = ({ 
   post, 
@@ -8,6 +9,7 @@ const PostCard = ({
   onToggleLike, 
   onOpenComments 
 }) => {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const isOwner = currentUserId === post.user._id || currentUserId === post.user.id;
   const isLiked = post.likes.includes(currentUserId);
   const likesCount = post.likes.length;
@@ -33,40 +35,55 @@ const PostCard = ({
   };
 
   const handleDeleteClick = () => {
-    if (window.confirm('Are you sure you want to delete this post?')) {
-      onDelete(post._id);
-    }
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(post._id);
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-4">
+    <div className="bg-white rounded-lg shadow-md p-6 mb-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           {/* Avatar */}
-          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
-            {post.user.name.charAt(0).toUpperCase()}
+          <div className="relative w-10 h-10">
+            {post.user.avatar ? (
+              <img
+                src={post.user.avatar}
+                alt={`${post.user.name}'s avatar`}
+                className="w-10 h-10 rounded-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div className={`w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium ${post.user.avatar ? 'hidden' : ''}`}>
+              {post.user.name.charAt(0).toUpperCase()}
+            </div>
           </div>
           
           {/* Name and Timestamp */}
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">
+            <h3 className="font-semibold text-gray-900">
               {post.user.name}
             </h3>
-            <div className="flex flex-col space-y-1 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex flex-col space-y-1 text-sm text-gray-500">
               <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-400 dark:text-gray-500">Created on:</span>
+                <span className="text-xs text-gray-400">Created on:</span>
                 <time dateTime={post.createdAt}>
                   {formatFullDateTime(post.createdAt)}
                 </time>
               </div>
               {post.edited && post.updatedAt && (
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs text-gray-400 dark:text-gray-500">Updated on:</span>
+                  <span className="text-xs text-gray-400">Updated on:</span>
                   <time dateTime={post.updatedAt}>
                     {formatFullDateTime(post.updatedAt)}
                   </time>
-                  <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">
                     Edited
                   </span>
                 </div>
@@ -80,7 +97,7 @@ const PostCard = ({
           <div className="flex items-center space-x-2">
             <button
               onClick={handleEditClick}
-              className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 p-1 rounded transition-colors"
+              className="text-gray-500 hover:text-blue-600 hover:text-blue-600 p-1 rounded transition-colors"
               aria-label="Edit post"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +106,7 @@ const PostCard = ({
             </button>
             <button
               onClick={handleDeleteClick}
-              className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 p-1 rounded transition-colors"
+              className="text-gray-500 hover:text-red-600   p-1 rounded transition-colors"
               aria-label="Delete post"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +120,7 @@ const PostCard = ({
       {/* Body */}
       <div className="mb-4">
         {/* Text Content */}
-        <p className="text-gray-900 dark:text-white whitespace-pre-wrap">
+        <p className="text-gray-900 whitespace-pre-wrap">
           {post.text}
         </p>
         
@@ -113,7 +130,7 @@ const PostCard = ({
             <img
               src={post.image}
               alt="Post image"
-              className="max-w-full h-auto rounded-lg border border-gray-200 dark:border-gray-700"
+              className="max-w-full h-auto rounded-lg border border-gray-200 "
               onError={(e) => {
                 console.error('Image failed to load:', post.image);
                 e.target.style.display = 'none';
@@ -124,15 +141,15 @@ const PostCard = ({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between pt-3 border-t border-gray-200 ">
           <div className="flex items-center space-x-6">
             {/* Like Button */}
             <button
               onClick={handleLikeClick}
               className={`flex items-center space-x-2 px-3 py-1 rounded-lg transition-colors ${
                 isLiked
-                  ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                  ? 'text-red-600  bg-red-50 '
+                  : 'text-gray-600  hover:text-red-600  hover:bg-red-50 '
               }`}
               aria-label={isLiked ? 'Unlike post' : 'Like post'}
             >
@@ -145,7 +162,7 @@ const PostCard = ({
             {/* Comment Button */}
             <button
               onClick={() => onOpenComments(post._id)}
-              className="flex items-center space-x-2 px-3 py-1 rounded-lg text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+              className="flex items-center space-x-2 px-3 py-1 rounded-lg text-gray-600  hover:text-blue-600  hover:bg-blue-50  transition-colors"
               aria-label="View comments"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +173,7 @@ const PostCard = ({
 
             {/* Share Button (Optional) */}
             <button
-              className="flex items-center space-x-2 px-3 py-1 rounded-lg text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+              className="flex items-center space-x-2 px-3 py-1 rounded-lg text-gray-600  hover:text-green-600  hover:bg-green-50  transition-colors"
               aria-label="Share post"
               onClick={() => {
                 if (navigator.share) {
@@ -178,6 +195,18 @@ const PostCard = ({
             </button>
           </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Post"
+        message="Are you sure you want to delete this post? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };

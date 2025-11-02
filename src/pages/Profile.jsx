@@ -9,7 +9,7 @@ import { postsApi } from '../api/postsApi.js';
 
 const Profile = () => {
   const { userId } = useParams();
-  const { user: currentUser, isAuthenticated, loading: authLoading } = useAuth();
+  const { user: currentUser, isAuthenticated, loading: authLoading, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   // State management
@@ -98,6 +98,17 @@ const Profile = () => {
       const updatedUser = await usersApi.updateUser(targetUserId, editForm);
       setProfileUser(updatedUser.data);
       setIsEditing(false);
+      
+      // If updating own profile, refresh the user data in AuthContext
+      // so navbar and other components get the updated avatar/name
+      if (isOwnProfile) {
+        try {
+          await refreshUser();
+        } catch (refreshErr) {
+          console.warn('Failed to refresh user data in AuthContext:', refreshErr);
+          // Don't show error to user since profile update was successful
+        }
+      }
     } catch (err) {
       setError('Failed to update profile');
       console.error('Error updating profile:', err);
@@ -173,7 +184,7 @@ const Profile = () => {
   // Show loading while auth is initializing
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-4xl mx-auto pt-8 px-4">
           <div className="flex items-center justify-center py-12">
@@ -181,7 +192,7 @@ const Profile = () => {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Initializing...</span>
+            <span className="ml-3 text-gray-600">Initializing...</span>
           </div>
         </div>
       </div>
@@ -194,7 +205,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-4xl mx-auto pt-8 px-4">
           <div className="flex items-center justify-center py-12">
@@ -202,7 +213,7 @@ const Profile = () => {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading profile...</span>
+            <span className="ml-3 text-gray-600">Loading profile...</span>
           </div>
         </div>
       </div>
@@ -211,15 +222,15 @@ const Profile = () => {
 
   if (error && !profileUser) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-4xl mx-auto pt-8 px-4">
           <div className="text-center py-12">
             <svg className="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">Profile not found</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{error}</p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Profile not found</h3>
+            <p className="mt-1 text-sm text-gray-500">{error}</p>
           </div>
         </div>
       </div>
@@ -227,14 +238,14 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Navbar at top */}
       <Navbar />
       
       {/* Main Content */}
       <div className="max-w-4xl mx-auto pt-8 px-4 pb-8">
         {/* Profile Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           {isEditing ? (
             /* Edit Profile Form */
             <form onSubmit={handleSaveProfile} className="space-y-4">
@@ -246,7 +257,7 @@ const Profile = () => {
                 </div>
                 <div className="flex-1 space-y-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                       Name
                     </label>
                     <input
@@ -255,12 +266,12 @@ const Profile = () => {
                       name="name"
                       value={editForm.name}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 mb-1">
                       Avatar URL
                     </label>
                     <input
@@ -269,12 +280,12 @@ const Profile = () => {
                       name="avatar"
                       value={editForm.avatar}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                       placeholder="https://example.com/avatar.jpg"
                     />
                   </div>
                   <div>
-                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
                       Bio
                     </label>
                     <textarea
@@ -283,7 +294,7 @@ const Profile = () => {
                       value={editForm.bio}
                       onChange={handleInputChange}
                       rows="3"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white resize-none"
                       placeholder="Tell us about yourself..."
                       maxLength="500"
                     />
@@ -294,7 +305,7 @@ const Profile = () => {
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
@@ -327,18 +338,18 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 truncate">
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 truncate">
                     {profileUser.name}
                   </h1>
-                  <p className="text-gray-600 dark:text-gray-400 mb-3 text-sm sm:text-base truncate">
+                  <p className="text-gray-600 mb-3 text-sm sm:text-base truncate">
                     {profileUser.email}
                   </p>
                   {profileUser.bio && (
-                    <p className="text-gray-700 dark:text-gray-300 mb-3 text-sm sm:text-base line-clamp-2">
+                    <p className="text-gray-700 mb-3 text-sm sm:text-base line-clamp-2">
                       {profileUser.bio}
                     </p>
                   )}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-1 sm:space-y-0 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-1 sm:space-y-0 text-sm text-gray-500">
                     <span>{posts.length} posts</span>
                     <span>Joined {new Date(profileUser.createdAt).toLocaleDateString()}</span>
                   </div>
@@ -348,7 +359,7 @@ const Profile = () => {
                 <div className="flex justify-end sm:justify-start">
                   <button
                     onClick={handleEditProfile}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors whitespace-nowrap"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors whitespace-nowrap"
                   >
                     <span className="hidden sm:inline">Edit Profile</span>
                     <span className="sm:hidden">Edit</span>
@@ -361,25 +372,25 @@ const Profile = () => {
 
         {/* Error Display */}
         {error && (
-          <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
+            <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
 
         {/* Posts Section */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
             {isOwnProfile ? 'Your Posts' : `${profileUser.name}'s Posts`}
           </h2>
           
           <div className="space-y-4">
             {posts.length === 0 ? (
-              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
+              <div className="text-center py-12 bg-white rounded-lg shadow-sm">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No posts yet</h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No posts yet</h3>
+                <p className="mt-1 text-sm text-gray-500">
                   {isOwnProfile ? "You haven't shared anything yet." : "This user hasn't shared anything yet."}
                 </p>
               </div>

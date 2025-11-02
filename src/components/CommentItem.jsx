@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import CommentEditInline from './CommentEditInline.jsx';
+import { ConfirmModal } from './ui';
 
 const CommentItem = ({ comment, currentUserId, onEdit, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Use robust ID comparison similar to PostCard component
   const isOwner = currentUserId === comment.user._id || currentUserId === comment.user.id;
@@ -38,17 +40,32 @@ const CommentItem = ({ comment, currentUserId, onEdit, onDelete }) => {
   };
 
   const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this comment?')) {
-      onDelete(comment._id);
-    }
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(comment._id);
   };
 
   return (
     <div className="p-4">
       <div className="flex items-start space-x-3">
         {/* Avatar */}
-        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-          {comment.user.name.charAt(0).toUpperCase()}
+        <div className="relative w-8 h-8 flex-shrink-0">
+          {comment.user.avatar ? (
+            <img
+              src={comment.user.avatar}
+              alt={`${comment.user.name}'s avatar`}
+              className="w-8 h-8 rounded-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div className={`w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium ${comment.user.avatar ? 'hidden' : ''}`}>
+            {comment.user.name.charAt(0).toUpperCase()}
+          </div>
         </div>
 
         {/* Comment Content */}
@@ -56,17 +73,17 @@ const CommentItem = ({ comment, currentUserId, onEdit, onDelete }) => {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+              <h4 className="text-sm font-semibold text-gray-900">
                 {comment.user.name}
               </h4>
-              <div className="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex items-center space-x-1 text-xs text-gray-500">
                 <time dateTime={comment.createdAt}>
                   {formatTimestamp(comment.createdAt)}
                 </time>
                 {comment.edited && (
                   <>
                     <span>•</span>
-                    <span className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded text-xs">
+                    <span className="bg-gray-100 px-1 py-0.5 rounded text-xs">
                       Edited
                     </span>
                   </>
@@ -79,7 +96,7 @@ const CommentItem = ({ comment, currentUserId, onEdit, onDelete }) => {
               <div className="flex items-center space-x-1">
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-1 rounded transition-colors"
+                  className="text-gray-400 hover:text-blue-600  p-1 rounded transition-colors"
                   aria-label="Edit comment"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +105,7 @@ const CommentItem = ({ comment, currentUserId, onEdit, onDelete }) => {
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 p-1 rounded transition-colors"
+                  className="text-gray-400 hover:text-red-600  p-1 rounded transition-colors"
                   aria-label="Delete comment"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,13 +125,25 @@ const CommentItem = ({ comment, currentUserId, onEdit, onDelete }) => {
                 onCancel={handleEditCancel}
               />
             ) : (
-              <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">
+              <p className="text-sm text-gray-900 whitespace-pre-wrap">
                 {comment.text}
               </p>
             )}
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Comment"
+        message="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };

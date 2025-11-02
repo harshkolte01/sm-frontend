@@ -1,25 +1,34 @@
 # Social Media Frontend
 
-A modern, responsive social media application frontend built with React, Vite, and Tailwind CSS. This application provides a complete social media experience with user authentication, post creation, commenting, and real-time interactions.
+A modern, responsive social media application frontend built with React, Vite, and Tailwind CSS. This application provides a complete social media experience with user authentication, post creation, commenting, and real-time interactions featuring a clean, professional light theme design.
 
 ## 🚀 Features
 
 ### Core Features
 - **User Authentication** - Secure login/signup with JWT token management
-- **Social Feed** - View and interact with posts from all users
-- **Post Management** - Create, edit, and delete posts with rich content
-- **Comments System** - Add, edit, and delete comments on posts
-- **User Profiles** - View and edit user profiles with avatar support
-- **Dark/Light Theme** - Toggle between themes with system preference detection
-- **Responsive Design** - Mobile-first design that works on all devices
+- **Social Feed** - View and interact with posts from all users with advanced filtering and sorting
+- **Post Management** - Create, edit, and delete posts with rich content and image support
+- **Comments System** - Add, edit, and delete comments on posts with inline editing
+- **User Profiles** - View and edit user profiles with comprehensive avatar support
+- **Avatar System** - Complete avatar functionality with image display and fallback to initials
+- **Light Theme Design** - Clean, professional light theme optimized for readability
+- **Responsive Design** - Mobile-first design that works seamlessly on all devices
+
+### Enhanced UI Features
+- **Interactive Navigation** - Active page indicators with green highlights and blue hover effects
+- **Modal System** - Elegant modals with semi-transparent overlays for editing posts and viewing comments
+- **Animated Elements** - Smooth animations and transitions throughout the interface
+- **Advanced Feed Controls** - Search, filter by user posts, and sort by newest/oldest/most liked
+- **Image Upload** - Support for both file upload and URL-based image sharing
+- **Character Counters** - Real-time character counting for posts and comments
 
 ### Technical Features
-- **Real-time Updates** - Dynamic content loading and updates
-- **Form Validation** - Client-side validation with React Hook Form and Yup
-- **Error Handling** - Comprehensive error handling with user-friendly messages
-- **Loading States** - Smooth loading indicators throughout the app
+- **Real-time Updates** - Dynamic content loading and updates with optimistic UI
+- **Form Validation** - Comprehensive client-side validation with user-friendly error messages
+- **Error Handling** - Robust error handling with graceful fallbacks
+- **Loading States** - Smooth loading indicators and skeleton screens
 - **Offline Support** - Graceful handling of network connectivity issues
-- **Toast Notifications** - User feedback for actions and errors
+- **Performance Optimized** - Efficient rendering and state management
 
 ## 🛠️ Tech Stack
 
@@ -35,7 +44,7 @@ A modern, responsive social media application frontend built with React, Vite, a
 - **Clsx 2.1.1** - Conditional className utility
 
 ### State Management & API
-- **React Context** - Global state management for auth and theme
+- **React Context** - Global state management for authentication
 - **Axios 1.13.1** - HTTP client for API requests
 - **Custom API Client** - Wrapper for standardized API interactions
 
@@ -61,41 +70,37 @@ src/
 │   └── index.js           # API exports
 ├── components/            # Reusable components
 │   ├── ui/                # Base UI components
-│   │   ├── Avatar.jsx     # User avatar component
+│   │   ├── Avatar.jsx     # User avatar component with fallback
 │   │   ├── Button.jsx     # Styled button component
 │   │   ├── Input.jsx      # Form input component
 │   │   ├── Textarea.jsx   # Form textarea component
 │   │   ├── Spinner.jsx    # Loading spinner
 │   │   └── index.js       # UI components export
-│   ├── AuthForm.jsx       # Login/Signup form
-│   ├── CommentItem.jsx    # Individual comment display
-│   ├── CommentList.jsx    # Comments container
+│   ├── AuthForm.jsx       # Login/Signup form with light theme
+│   ├── CommentItem.jsx    # Individual comment display with avatars
+│   ├── CommentList.jsx    # Comments container with user avatars
 │   ├── CommentEditInline.jsx # Inline comment editing
-│   ├── Footer.jsx         # App footer
-│   ├── Navbar.jsx         # Navigation bar
-│   ├── PostCard.jsx       # Individual post display
-│   ├── PostForm.jsx       # Post creation/editing form
-│   ├── PostEditModal.jsx  # Post editing modal
-│   ├── SiteBanner.jsx     # Site-wide banner
-│   └── ThemeToggle.jsx    # Dark/light theme switcher
+│   ├── Footer.jsx         # App footer (light theme only)
+│   ├── Navbar.jsx         # Navigation with active indicators & avatars
+│   ├── PostCard.jsx       # Individual post display with avatars
+│   ├── PostForm.jsx       # Post creation form with user avatar
+│   ├── PostEditModal.jsx  # Post editing modal with light overlay
+│   └── SiteBanner.jsx     # Site-wide banner
 ├── context/               # React Context providers
-│   ├── AuthContext.jsx    # Authentication state management
-│   └── ThemeContext.jsx   # Theme state management
+│   └── AuthContext.jsx    # Authentication state management with refreshUser
 ├── hooks/                 # Custom React hooks
-│   ├── useAuth.js         # Authentication hook
-│   └── useTheme.js        # Theme management hook
-├── pages/                 # Page components
-│   ├── Landing.jsx        # Landing/home page
+│   └── useAuth.js         # Authentication hook
+├── pages/                 # Page components (all light theme)
+│   ├── Landing.jsx        # Landing page with animated icons
 │   ├── Login.jsx          # Login page
 │   ├── Signup.jsx         # Registration page
-│   ├── Feed.jsx           # Main social feed
-│   ├── Profile.jsx        # User profile page
+│   ├── Feed.jsx           # Main social feed with filtering & search
+│   ├── Profile.jsx        # User profile page with avatar sync
 │   ├── ErrorPage.jsx      # Error handling page
 │   ├── NotFound.jsx       # 404 page
 │   └── Offline.jsx        # Offline status page
 ├── styles/                # Global styles
-│   ├── globals.css        # Global CSS styles
-│   └── themes.css         # Theme-specific styles
+│   └── globals.css        # Global CSS styles (light theme only)
 ├── assets/                # Static assets
 └── App.jsx                # Main app component
 ```
@@ -157,16 +162,29 @@ npm run preview
 - `npm run preview` - Preview the production build locally
 - `npm run lint` - Run ESLint for code quality checks
 
-## 🎨 Theming
+## 🎨 Design System
 
-The application supports both light and dark themes:
+The application features a clean, professional light theme design:
 
-- **Automatic Detection** - Respects system theme preference
-- **Manual Toggle** - Users can switch themes manually
-- **Persistent Storage** - Theme preference is saved in localStorage
-- **Tailwind Integration** - Uses Tailwind's dark mode classes
+- **Light Theme Only** - Optimized light theme for maximum readability and accessibility
+- **Consistent Color Palette** - Blue accent colors (#3b82f6) with gray neutrals
+- **Professional Styling** - Clean, modern interface with subtle shadows and borders
+- **Tailwind Integration** - Utility-first CSS with custom component styling
+- **Responsive Typography** - Optimized text sizing and spacing across all devices
+- **Interactive Elements** - Hover states, focus indicators, and smooth transitions
 
-## 🔐 Authentication
+## 🖼️ Avatar System
+
+Comprehensive avatar functionality throughout the application:
+
+- **Image Display** - Shows user profile pictures when available
+- **Fallback System** - Displays user initials when no image is available
+- **Error Handling** - Graceful fallback when images fail to load
+- **Real-time Sync** - Avatar updates propagate across all components
+- **Consistent Sizing** - Responsive avatar sizes for different contexts
+- **Components Integration** - Avatars in navbar, posts, comments, and forms
+
+## � Authentication
 
 The app implements JWT-based authentication:
 
@@ -174,6 +192,7 @@ The app implements JWT-based authentication:
 - **Auto-refresh** - Automatic token validation on app load
 - **Route Protection** - Protected routes redirect to login
 - **Error Handling** - Graceful handling of expired tokens
+- **User Context** - Global user state with refreshUser functionality
 
 ## 📱 Responsive Design
 
@@ -241,6 +260,22 @@ The frontend communicates with a REST API backend:
 - **Component Structure** - Functional components with hooks
 - **File Naming** - PascalCase for components, camelCase for utilities
 
+## 🆕 Recent Updates & Improvements
+
+### Version 2.0 - Light Theme Redesign
+- **Complete Theme Overhaul** - Removed dark mode, implemented professional light theme
+- **Enhanced Avatar System** - Comprehensive avatar support with image display and fallback
+- **Improved Navigation** - Active page indicators and hover effects
+- **Modal System Upgrade** - Light, semi-transparent overlays for better UX
+- **Component Cleanup** - Removed unused theme files and optimized styling
+- **Bug Fixes** - Resolved component errors and styling conflicts
+
+### Key Architectural Changes
+- **Removed Files**: `ThemeContext.jsx`, `ThemeToggle.jsx`, `useTheme.js`, `themes.css`
+- **Enhanced Components**: All components now support avatar display with graceful fallbacks
+- **Styling Consistency**: Standardized color palette using Tailwind blue variants
+- **Performance Improvements**: Cleaner CSS, reduced bundle size, optimized rendering
+
 ## 🐛 Troubleshooting
 
 ### Common Issues
@@ -258,6 +293,11 @@ The frontend communicates with a REST API backend:
    - Clear localStorage: `localStorage.clear()`
    - Check token expiration
    - Verify API endpoints
+
+4. **Avatar Display Issues**
+   - Check image URL validity
+   - Verify user data is properly loaded
+   - Fallback to initials should work automatically
 
 ## 📄 License
 

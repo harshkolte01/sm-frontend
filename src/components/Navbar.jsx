@@ -1,12 +1,35 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
-import ThemeToggle from './ThemeToggle.jsx';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Helper function to determine if a path is active
+  const isActivePath = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  // Helper function to get nav link classes
+  const getNavLinkClasses = (path, isMobile = false) => {
+    const baseClasses = isMobile
+      ? "block px-3 py-2 text-base font-medium transition-colors relative focus:outline-none focus:ring-0 focus:border-transparent"
+      : "px-3 py-2 text-sm font-medium transition-colors relative focus:outline-none focus:ring-0 focus:border-transparent";
+    
+    const isActive = isActivePath(path);
+    
+    if (isActive) {
+      return `${baseClasses} text-gray-900 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-green-400 after:content-['']`;
+    } else {
+      return `${baseClasses} text-gray-700 hover:text-blue-600 hover:after:absolute hover:after:bottom-0 hover:after:left-0 hover:after:right-0 hover:after:h-0.5 hover:after:bg-blue-400 hover:after:content-['']`;
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -23,14 +46,14 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+    <nav className="bg-white shadow-lg border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Left Side - Site Name */}
           <div className="shrink-0">
             <Link
               to="/"
-              className="text-xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
               onClick={closeMobileMenu}
             >
               SocialApp
@@ -41,7 +64,7 @@ const Navbar = () => {
           <div className="hidden md:flex md:items-center md:space-x-6">
             <Link
               to="/"
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              className={getNavLinkClasses('/')}
             >
               Home
             </Link>
@@ -50,34 +73,44 @@ const Navbar = () => {
               <>
                 <Link
                   to="/feed"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={getNavLinkClasses('/feed')}
                 >
                   Feed
                 </Link>
                 <Link
                   to="/profile"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={getNavLinkClasses('/profile')}
                 >
                   Profile
                 </Link>
                 
                 {/* User Avatar and Name */}
                 <div className="flex items-center space-x-2 px-3 py-2">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  <div className="relative w-8 h-8">
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={`${user.name}'s avatar`}
+                        className="w-8 h-8 rounded-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium ${user?.avatar ? 'hidden' : ''}`}>
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
                   </div>
-                  <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                  <span className="text-gray-700 text-sm font-medium">
                     {user?.name || 'User'}
                   </span>
                 </div>
                 
-                {/* Theme Toggle */}
-                <ThemeToggle />
-                
                 {/* Logout Button */}
                 <button
                   onClick={handleLogout}
-                  className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 >
                   Logout
                 </button>
@@ -86,28 +119,25 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={getNavLinkClasses('/login')}
                 >
                   Login
                 </Link>
                 <Link
                   to="/signup"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className={getNavLinkClasses('/signup')}
                 >
                   Signup
                 </Link>
-                
-                {/* Theme Toggle for non-authenticated users */}
-                <ThemeToggle />
               </>
             )}
           </div>
 
-          {/* Mobile menu button (only visible on mobile, hidden on desktop) */}
-          <div className="flex items-center md:hidden lg:hidden xl:hidden">
+          {/* Mobile menu button */}
+          <div className="flex items-center md:hidden">
             <button
               onClick={toggleMobileMenu}
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-2 rounded-md transition-colors md:hidden lg:hidden xl:hidden"
+              className="text-gray-700 hover:text-blue-600 p-2 rounded-md transition-colors"
               aria-expanded={isMobileMenuOpen}
               aria-label="Toggle mobile menu"
             >
@@ -125,10 +155,10 @@ const Navbar = () => {
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
               <Link
                 to="/"
-                className="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                className={getNavLinkClasses('/', true)}
                 onClick={closeMobileMenu}
               >
                 Home
@@ -138,14 +168,14 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/feed"
-                    className="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className={getNavLinkClasses('/feed', true)}
                     onClick={closeMobileMenu}
                   >
                     Feed
                   </Link>
                   <Link
                     to="/profile"
-                    className="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className={getNavLinkClasses('/profile', true)}
                     onClick={closeMobileMenu}
                   >
                     Profile
@@ -153,22 +183,30 @@ const Navbar = () => {
                   
                   {/* User Info Mobile */}
                   <div className="flex items-center space-x-3 px-3 py-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    <div className="relative w-8 h-8">
+                      {user?.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt={`${user.name}'s avatar`}
+                          className="w-8 h-8 rounded-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium ${user?.avatar ? 'hidden' : ''}`}>
+                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                      </div>
                     </div>
-                    <span className="text-gray-700 dark:text-gray-300 text-base font-medium">
+                    <span className="text-gray-700 text-base font-medium">
                       {user?.name || 'User'}
                     </span>
                   </div>
                   
-                  {/* Theme Toggle Mobile */}
-                  <div className="px-3 py-2">
-                    <ThemeToggle />
-                  </div>
-                  
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className="block w-full text-left text-gray-700 hover:text-red-600 px-3 py-2 rounded-md text-base font-medium transition-colors"
                   >
                     Logout
                   </button>
@@ -177,23 +215,18 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/login"
-                    className="block text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className={getNavLinkClasses('/login', true)}
                     onClick={closeMobileMenu}
                   >
                     Login
                   </Link>
                   <Link
                     to="/signup"
-                    className="block bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-base font-medium transition-colors"
+                    className={getNavLinkClasses('/signup', true)}
                     onClick={closeMobileMenu}
                   >
                     Signup
                   </Link>
-                  
-                  {/* Theme Toggle Mobile for non-authenticated users */}
-                  <div className="px-3 py-2">
-                    <ThemeToggle />
-                  </div>
                 </>
               )}
             </div>

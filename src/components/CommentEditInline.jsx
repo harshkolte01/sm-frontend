@@ -80,10 +80,10 @@ const CommentEditInline = ({ comment, onSave, onCancel }) => {
           value={text}
           onChange={handleTextChange}
           onKeyDown={handleKeyDown}
-          className={`w-full p-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 ${
+          className={`w-full p-2 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500  ${
             error 
-              ? 'border-red-300 dark:border-red-600 focus:ring-red-500' 
-              : 'border-gray-300 dark:border-gray-600'
+              ? 'border-red-300 focus:ring-red-500' 
+              : 'border-gray-300'
           }`}
           rows="2"
           maxLength={MAX_CHARS}
@@ -95,8 +95,8 @@ const CommentEditInline = ({ comment, onSave, onCancel }) => {
         <div className="flex justify-between items-center mt-1">
           <div className={`text-xs ${
             remainingChars < 50 
-              ? 'text-red-500 dark:text-red-400' 
-              : 'text-gray-500 dark:text-gray-400'
+              ? 'text-red-500' 
+              : 'text-gray-500'
           }`}>
             {remainingChars} characters remaining
           </div>
@@ -104,8 +104,8 @@ const CommentEditInline = ({ comment, onSave, onCancel }) => {
 
         {/* Error Message */}
         {error && (
-          <div className="mt-1 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
+          <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-xs text-red-600">{error}</p>
           </div>
         )}
 
@@ -114,7 +114,7 @@ const CommentEditInline = ({ comment, onSave, onCancel }) => {
           <button
             type="button"
             onClick={handleCancel}
-            className="px-3 py-1 text-xs text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+            className="px-3 py-1 text-xs text-gray-600 hover:text-gray-800 transition-colors"
             disabled={isSubmitting}
           >
             Cancel
@@ -129,7 +129,7 @@ const CommentEditInline = ({ comment, onSave, onCancel }) => {
         </div>
       </form>
       
-      <div className="text-xs text-gray-500 dark:text-gray-400">
+      <div className="text-xs text-gray-500">
         Press Ctrl+Enter to save, Escape to cancel
       </div>
     </div>

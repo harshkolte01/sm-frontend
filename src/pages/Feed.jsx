@@ -254,7 +254,7 @@ const Feed = () => {
   // Show loading while auth is initializing
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-2xl mx-auto pt-8 px-4">
           <div className="flex items-center justify-center py-12">
@@ -262,7 +262,7 @@ const Feed = () => {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Initializing...</span>
+            <span className="ml-3 text-gray-600">Initializing...</span>
           </div>
         </div>
       </div>
@@ -275,7 +275,7 @@ const Feed = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="max-w-2xl mx-auto pt-8 px-4">
           <div className="flex items-center justify-center py-12">
@@ -283,7 +283,7 @@ const Feed = () => {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading your feed...</span>
+            <span className="ml-3 text-gray-600">Loading your feed...</span>
           </div>
         </div>
       </div>
@@ -291,7 +291,7 @@ const Feed = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Navbar at top */}
       <Navbar />
       
@@ -299,9 +299,9 @@ const Feed = () => {
       <div className="lg:hidden px-4 pt-4">
         <button
           onClick={() => setShowMobileFilters(!showMobileFilters)}
-          className="w-full flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
+          className="w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200"
         >
-          <span className="text-gray-700 dark:text-gray-300 font-medium">Filters & Search</span>
+          <span className="text-gray-700 font-medium">Filters & Search</span>
           <svg
             className={`w-5 h-5 text-gray-500 transition-transform ${showMobileFilters ? 'rotate-180' : ''}`}
             fill="none"
@@ -316,10 +316,10 @@ const Feed = () => {
       {/* Mobile Filters Panel */}
       {showMobileFilters && (
         <div className="lg:hidden px-4 pb-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-4">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Search Posts
               </label>
               <input
@@ -327,19 +327,19 @@ const Feed = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by content or author..."
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 "
               />
             </div>
 
             {/* Sort By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Sort By
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 "
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -349,13 +349,13 @@ const Feed = () => {
 
             {/* Filter By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Show Posts
               </label>
               <select
                 value={filterBy}
                 onChange={(e) => setFilterBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 "
               >
                 <option value="all">All Posts</option>
                 <option value="myPosts">My Posts Only</option>
@@ -365,7 +365,7 @@ const Feed = () => {
             {/* Clear Filters */}
             <button
               onClick={clearFilters}
-              className="w-full px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
+              className="w-full px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200  rounded-md transition-colors"
             >
               Clear All Filters
             </button>
@@ -378,30 +378,30 @@ const Feed = () => {
         {/* Sidebar - 20% width */}
         <div className="w-1/5 space-y-6">
           {/* Search Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Search</h3>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Search</h3>
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search posts..."
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-sm"
             />
           </div>
 
           {/* Filters Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Filters</h3>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
             
             {/* Sort By */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Sort By
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-sm"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -411,13 +411,13 @@ const Feed = () => {
 
             {/* Filter By */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Show Posts
               </label>
               <select
                 value={filterBy}
                 onChange={(e) => setFilterBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-sm"
               >
                 <option value="all">All Posts</option>
                 <option value="myPosts">My Posts Only</option>
@@ -427,28 +427,28 @@ const Feed = () => {
             {/* Clear Filters */}
             <button
               onClick={clearFilters}
-              className="w-full px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
+              className="w-full px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200  rounded-md transition-colors"
             >
               Clear Filters
             </button>
           </div>
 
           {/* Stats Section */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Stats</h3>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Stats</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Total Posts:</span>
-                <span className="font-medium text-gray-900 dark:text-white">{posts.length}</span>
+                <span className="text-gray-600">Total Posts:</span>
+                <span className="font-medium text-gray-900">{posts.length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Showing:</span>
-                <span className="font-medium text-gray-900 dark:text-white">{filteredPosts.length}</span>
+                <span className="text-gray-600">Showing:</span>
+                <span className="font-medium text-gray-900">{filteredPosts.length}</span>
               </div>
               {searchTerm && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Search:</span>
-                  <span className="font-medium text-blue-600 dark:text-blue-400 truncate max-w-20" title={searchTerm}>
+                  <span className="text-gray-600">Search:</span>
+                  <span className="font-medium text-blue-600 truncate max-w-20" title={searchTerm}>
                     "{searchTerm}"
                   </span>
                 </div>
@@ -463,10 +463,10 @@ const Feed = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-gray-900">
                   Welcome back, {user?.name}!
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600">
                   What's on your mind today?
                 </p>
               </div>
@@ -491,8 +491,8 @@ const Feed = () => {
 
           {/* Error Display */}
           {error && (
-            <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
 
@@ -503,10 +503,10 @@ const Feed = () => {
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                <h3 className="mt-2 text-sm font-medium text-gray-900">
                   {searchTerm || filterBy !== 'all' ? 'No posts match your filters' : 'No posts yet'}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-sm text-gray-500">
                   {searchTerm || filterBy !== 'all'
                     ? 'Try adjusting your search or filters to see more posts.'
                     : 'Be the first to share something with your friends!'
@@ -515,7 +515,7 @@ const Feed = () => {
                 {(searchTerm || filterBy !== 'all') && (
                   <button
                     onClick={clearFilters}
-                    className="mt-3 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                    className="mt-3 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
                   >
                     Clear filters
                   </button>
@@ -567,10 +567,10 @@ const Feed = () => {
         <div className="mb-6">
           <div className="flex flex-col space-y-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-2xl font-bold text-gray-900">
                 Welcome back, {user?.name}!
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600">
                 What's on your mind today?
               </p>
             </div>
@@ -595,8 +595,8 @@ const Feed = () => {
 
         {/* Error Display */}
         {error && (
-          <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
+            <p className="text-sm text-red-600">{error}</p>
           </div>
         )}
 
@@ -607,10 +607,10 @@ const Feed = () => {
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
                 {searchTerm || filterBy !== 'all' ? 'No posts match your filters' : 'No posts yet'}
               </h3>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-1 text-sm text-gray-500">
                 {searchTerm || filterBy !== 'all'
                   ? 'Try adjusting your search or filters to see more posts.'
                   : 'Be the first to share something with your friends!'
@@ -619,7 +619,7 @@ const Feed = () => {
               {(searchTerm || filterBy !== 'all') && (
                 <button
                   onClick={clearFilters}
-                  className="mt-3 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                  className="mt-3 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
                 >
                   Clear filters
                 </button>
@@ -676,15 +676,15 @@ const Feed = () => {
 
       {/* Comments Modal/Panel */}
       {showComments && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-20 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
                 Comments
               </h2>
               <button
                 onClick={handleCloseComments}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded transition-colors"
+                className="text-gray-400 hover:text-gray-600 p-1 rounded transition-colors"
                 aria-label="Close comments"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

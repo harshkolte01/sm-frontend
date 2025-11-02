@@ -5,11 +5,11 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+    <footer className="bg-white border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           {/* Left: Copyright */}
-          <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-sm text-gray-600">
             © {currentYear} {appName}. All rights reserved.
           </div>
 
@@ -17,19 +17,19 @@ const Footer = () => {
           <div className="flex items-center space-x-6">
             <a
               href="#privacy"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
             >
               Privacy
             </a>
             <a
               href="#terms"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
             >
               Terms
             </a>
             <a
               href="#contact"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
             >
               Contact
             </a>
@@ -37,14 +37,14 @@ const Footer = () => {
 
           {/* Right: Version/GitHub */}
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-500 dark:text-gray-500">
+            <span className="text-sm text-gray-500">
               v1.0.0
             </span>
             <a
               href="https://github.com/harshkolte01"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
               aria-label="View source code on GitHub"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
