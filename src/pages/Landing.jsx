@@ -319,14 +319,14 @@ const Landing = () => {
               <>
                 <Link
                   to="/feed"
-                  className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                  className="px-8 py-3 border-2 border-white bg-transparent !text-white font-semibold rounded-lg hover:bg-white hover:!text-black transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                   aria-label="Go to your feed"
                 >
                   Go to Feed
                 </Link>
                 <Link
                   to="/profile"
-                  className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                  className="px-8 py-3 border-2 border-white bg-transparent !text-white font-semibold rounded-lg hover:bg-white hover:!text-black transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                   aria-label="View your profile"
                 >
                   My Profile
@@ -337,14 +337,14 @@ const Landing = () => {
               <>
                 <Link
                   to="/signup"
-                  className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                  className="px-8 py-3 border-2 border-white bg-transparent !text-white font-semibold rounded-lg hover:bg-white hover:!text-black transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                   aria-label="Create your account now"
                 >
                   Get Started Free
                 </Link>
                 <Link
                   to="/login"
-                  className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                  className="px-8 py-3 border-2 border-white bg-transparent !text-white font-semibold rounded-lg hover:bg-white hover:!text-black transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                   aria-label="Sign in if you already have an account"
                 >
                   Sign In
