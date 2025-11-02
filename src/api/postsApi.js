@@ -1,7 +1,7 @@
 import apiClient from './apiClient.js';
 
 export const postsApi = {
-  // Get all posts with pagination - returns posts array from response
+  // Get all posts with pagination - returns full response with pagination metadata
   getPosts: async ({ page, limit, userId } = {}) => {
     const params = {};
     if (page) params.page = page;
@@ -9,7 +9,7 @@ export const postsApi = {
     if (userId) params.userId = userId;
     
     const response = await apiClient.get('/api/posts', { params });
-    return response.data.posts; // Return just the posts array
+    return response.data; // Return full response with posts and pagination
   },
 
   // Create a new post

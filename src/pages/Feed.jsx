@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
@@ -6,6 +6,7 @@ import PostForm from '../components/PostForm.jsx';
 import PostCard from '../components/PostCard.jsx';
 import PostEditModal from '../components/PostEditModal.jsx';
 import CommentList from '../components/CommentList.jsx';
+import { Pagination } from '../components/ui';
 import { useAuth } from '../hooks/useAuth.js';
 import { postsApi } from '../api/postsApi.js';
 
@@ -15,21 +16,25 @@ const Feed = () => {
   
   // State management
   const [posts, setPosts] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filterLoading, setFilterLoading] = useState(false);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  
+  // Pagination metadata state
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    pages: 0
+  });
   
   // Modal states
   const [editingPost, setEditingPost] = useState(null);
   const [showComments, setShowComments] = useState(null);
   
-  // Filter and search states
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('newest'); // newest, oldest, mostLiked
-  const [filterBy, setFilterBy] = useState('all'); // all, myPosts, following
+  // Filter states (for server-side filtering)
+  const [filterBy, setFilterBy] = useState('all'); // all, myPosts
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   
   // Post creation form visibility state
@@ -42,63 +47,93 @@ const Feed = () => {
     }
   }, [isAuthenticated, authLoading, navigate]);
 
-  // Load initial posts
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadPosts();
-    }
-  }, [isAuthenticated]);
-
   // A. Load feed (page mount)
-  const loadPosts = async (pageNum = 1, append = false) => {
+  const loadPosts = useCallback(async (pageNum = 1, isFilterChange = false) => {
     try {
-      if (!append) {
-        setLoading(true);
+      if (isFilterChange) {
+        setFilterLoading(true);
       } else {
-        setLoadingMore(true);
+        setLoading(true);
       }
       setError('');
 
-      const postsData = await postsApi.getPosts({ 
-        page: pageNum, 
-        limit: 20 
-      });
+      // Build request parameters
+      const requestParams = {
+        page: pageNum,
+        limit: 20
+      };
 
-      if (append) {
-        setPosts(prev => [...prev, ...postsData]);
-      } else {
-        setPosts(postsData);
+      // Add userId filter if "myPosts" is selected
+      if (filterBy === 'myPosts' && user?.id) {
+        requestParams.userId = user.id;
       }
 
-      // Check if there are more posts (simple check - if we got less than limit)
-      setHasMore(postsData.length === 20);
+      const response = await postsApi.getPosts(requestParams);
+
+      // Extract posts and pagination from response
+      const { posts: postsData, pagination: paginationData } = response;
+
+      setPosts(postsData);
+
+      // Update pagination state with backend data
+      setPagination(paginationData);
       
     } catch (err) {
       setError('Failed to load posts');
       console.error('Error loading posts:', err);
     } finally {
       setLoading(false);
-      setLoadingMore(false);
+      setFilterLoading(false);
+    }
+  }, [filterBy, user?.id]);
+
+  // Load initial posts
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadPosts();
+    }
+  }, [isAuthenticated, loadPosts]);
+
+  // Filter change effect
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    setPage(1); // Reset to page 1 when filter changes
+    loadPosts(1, true); // Pass true to indicate this is a filter change
+  }, [filterBy, isAuthenticated, loadPosts]);
+
+  // Navigate to specific page
+  const goToPage = (pageNum) => {
+    if (pageNum >= 1 && pageNum <= pagination.pages && pageNum !== page) {
+      setPage(pageNum);
+      loadPosts(pageNum);
+      // Scroll to top when changing pages
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  // Load more posts (pagination)
-  const loadMorePosts = () => {
-    if (!loadingMore && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      loadPosts(nextPage, true);
+  // Navigate to next page
+  const goToNextPage = () => {
+    if (page < pagination.pages) {
+      goToPage(page + 1);
+    }
+  };
+
+  // Navigate to previous page
+  const goToPreviousPage = () => {
+    if (page > 1) {
+      goToPage(page - 1);
     }
   };
 
   // B. Create a post
   const handleCreatePost = async (postData) => {
     try {
-      const newPost = await postsApi.createPost(postData);
-      // Prepend new post to the list for instant UI update
-      setPosts(prev => [newPost, ...prev]);
+      await postsApi.createPost(postData);
       // Hide the form after successful creation
       setShowCreateForm(false);
+      // Reload current page to get fresh data from backend
+      loadPosts(page);
     } catch (err) {
       console.error('Error creating post:', err);
       throw err; // Let PostForm handle the error
@@ -110,71 +145,18 @@ const Feed = () => {
     setShowCreateForm(!showCreateForm);
   };
 
-  // Filter and search functionality
-  useEffect(() => {
-    let filtered = [...posts];
-
-    // Apply search filter
-    if (searchTerm.trim()) {
-      filtered = filtered.filter(post =>
-        post.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.user?.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply content filter
-    if (filterBy === 'myPosts') {
-      // Use the same logic as PostCard component for consistency
-      filtered = filtered.filter(post => {
-        const postUserId = post.user?._id || post.user?.id;
-        const currentUserId = user?.id || user?._id;
-        
-        // Debug logging (remove in production)
-        if (posts.length > 0 && posts.indexOf(post) === 0) {
-          console.log('Filter Debug - Post User ID:', postUserId, 'Current User ID:', currentUserId);
-          console.log('Post User Object:', post.user);
-          console.log('Current User Object:', user);
-        }
-        
-        return currentUserId === postUserId;
-      });
-    }
-
-    // Apply sorting
-    switch (sortBy) {
-      case 'oldest':
-        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-        break;
-      case 'mostLiked':
-        filtered.sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0));
-        break;
-      case 'newest':
-      default:
-        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        break;
-    }
-
-    setFilteredPosts(filtered);
-  }, [posts, searchTerm, sortBy, filterBy, user?.id]);
-
   // Clear filters
   const clearFilters = () => {
-    setSearchTerm('');
-    setSortBy('newest');
     setFilterBy('all');
   };
 
   // C. Edit a post
   const handleEditPost = async (postId, newText) => {
     try {
-      const updatedPost = await postsApi.editPost(postId, { text: newText });
-      // Update post in local state
-      setPosts(prev => 
-        prev.map(post => 
-          post._id === postId ? updatedPost : post
-        )
-      );
+      await postsApi.editPost(postId, { text: newText });
       setEditingPost(null);
+      // Reload current page to get fresh data from backend
+      loadPosts(page);
     } catch (err) {
       console.error('Error editing post:', err);
       throw err; // Let modal handle the error
@@ -185,8 +167,8 @@ const Feed = () => {
   const handleDeletePost = async (postId) => {
     try {
       await postsApi.deletePost(postId);
-      // Remove post from local state
-      setPosts(prev => prev.filter(post => post._id !== postId));
+      // Reload current page to get fresh data from backend
+      loadPosts(page);
     } catch (err) {
       console.error('Error deleting post:', err);
       setError('Failed to delete post');
@@ -301,7 +283,7 @@ const Feed = () => {
           onClick={() => setShowMobileFilters(!showMobileFilters)}
           className="w-full flex items-center justify-between px-4 py-2 bg-white rounded-lg shadow-sm border border-gray-200"
         >
-          <span className="text-gray-700 font-medium">Filters & Search</span>
+          <span className="text-gray-700 font-medium">Filters</span>
           <svg
             className={`w-5 h-5 text-gray-500 transition-transform ${showMobileFilters ? 'rotate-180' : ''}`}
             fill="none"
@@ -317,36 +299,6 @@ const Feed = () => {
       {showMobileFilters && (
         <div className="lg:hidden px-4 pb-4">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-4">
-            {/* Search */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Posts
-              </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by content or author..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 "
-              />
-            </div>
-
-            {/* Sort By */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sort By
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 "
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="mostLiked">Most Liked</option>
-              </select>
-            </div>
-
             {/* Filter By */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -355,7 +307,7 @@ const Feed = () => {
               <select
                 value={filterBy}
                 onChange={(e) => setFilterBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 "
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">All Posts</option>
                 <option value="myPosts">My Posts Only</option>
@@ -363,12 +315,14 @@ const Feed = () => {
             </div>
 
             {/* Clear Filters */}
-            <button
-              onClick={clearFilters}
-              className="w-full px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200  rounded-md transition-colors"
-            >
-              Clear All Filters
-            </button>
+            {filterBy !== 'all' && (
+              <button
+                onClick={clearFilters}
+                className="w-full px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                Clear Filter
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -377,38 +331,10 @@ const Feed = () => {
       <div className="hidden lg:flex max-w-7xl mx-auto pt-8 px-4 pb-8 gap-6">
         {/* Sidebar - 20% width */}
         <div className="w-1/5 space-y-6">
-          {/* Search Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Search</h3>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search posts..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-sm"
-            />
-          </div>
-
           {/* Filters Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
             
-            {/* Sort By */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sort By
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-sm"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="mostLiked">Most Liked</option>
-              </select>
-            </div>
-
             {/* Filter By */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -417,7 +343,7 @@ const Feed = () => {
               <select
                 value={filterBy}
                 onChange={(e) => setFilterBy(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500  text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               >
                 <option value="all">All Posts</option>
                 <option value="myPosts">My Posts Only</option>
@@ -425,12 +351,14 @@ const Feed = () => {
             </div>
 
             {/* Clear Filters */}
-            <button
-              onClick={clearFilters}
-              className="w-full px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200  rounded-md transition-colors"
-            >
-              Clear Filters
-            </button>
+            {filterBy !== 'all' && (
+              <button
+                onClick={clearFilters}
+                className="w-full px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                Clear Filter
+              </button>
+            )}
           </div>
 
           {/* Stats Section */}
@@ -439,17 +367,23 @@ const Feed = () => {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Total Posts:</span>
-                <span className="font-medium text-gray-900">{posts.length}</span>
+                <span className="font-medium text-gray-900">{pagination.total}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Showing:</span>
-                <span className="font-medium text-gray-900">{filteredPosts.length}</span>
+                <span className="text-gray-600">Current Page:</span>
+                <span className="font-medium text-gray-900">{posts.length} posts</span>
               </div>
-              {searchTerm && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Page:</span>
+                <span className="font-medium text-gray-900">{pagination.page} of {pagination.pages}</span>
+              </div>
+              
+              {/* Active Filters */}
+              {filterBy !== 'all' && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Search:</span>
-                  <span className="font-medium text-blue-600 truncate max-w-20" title={searchTerm}>
-                    "{searchTerm}"
+                  <span className="text-gray-600">Filter:</span>
+                  <span className="font-medium text-blue-600">
+                    {filterBy === 'myPosts' ? 'My Posts' : filterBy}
                   </span>
                 </div>
               )}
@@ -496,33 +430,46 @@ const Feed = () => {
             </div>
           )}
 
+          {/* Filter Loading Indicator */}
+          {filterLoading && (
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md p-3">
+              <div className="flex items-center">
+                <svg className="animate-spin h-4 w-4 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="text-sm text-blue-600">Applying filters...</span>
+              </div>
+            </div>
+          )}
+
           {/* Posts Feed */}
-          <div className="space-y-4">
-            {filteredPosts.length === 0 ? (
+          <div className={`space-y-4 ${filterLoading ? 'opacity-50' : ''}`}>
+            {posts.length === 0 && !filterLoading ? (
               <div className="text-center py-12">
                 <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
                 <h3 className="mt-2 text-sm font-medium text-gray-900">
-                  {searchTerm || filterBy !== 'all' ? 'No posts match your filters' : 'No posts yet'}
+                  {filterBy !== 'all' ? 'No posts match your filter' : 'No posts yet'}
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  {searchTerm || filterBy !== 'all'
-                    ? 'Try adjusting your search or filters to see more posts.'
+                  {filterBy !== 'all'
+                    ? 'Try changing your filter to see more posts.'
                     : 'Be the first to share something with your friends!'
                   }
                 </p>
-                {(searchTerm || filterBy !== 'all') && (
+                {filterBy !== 'all' && (
                   <button
                     onClick={clearFilters}
                     className="mt-3 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
                   >
-                    Clear filters
+                    Clear filter
                   </button>
                 )}
               </div>
             ) : (
-              filteredPosts.map((post) => (
+              posts.map((post) => (
                 <PostCard
                   key={post._id}
                   post={post}
@@ -536,26 +483,16 @@ const Feed = () => {
             )}
           </div>
 
-          {/* Load More Button */}
-          {hasMore && posts.length > 0 && (
-            <div className="mt-8 text-center">
-              <button
-                onClick={loadMorePosts}
-                disabled={loadingMore}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loadingMore ? (
-                  <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Loading...
-                  </div>
-                ) : (
-                  'Load More Posts'
-                )}
-              </button>
+          {/* Pagination */}
+          {pagination.pages > 1 && (
+            <div className="mt-8">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.pages}
+                onPageChange={goToPage}
+                onPreviousPage={goToPreviousPage}
+                onNextPage={goToNextPage}
+              />
             </div>
           )}
         </div>
@@ -600,33 +537,46 @@ const Feed = () => {
           </div>
         )}
 
+        {/* Filter Loading Indicator */}
+        {filterLoading && (
+          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-md p-3">
+            <div className="flex items-center">
+              <svg className="animate-spin h-4 w-4 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span className="text-sm text-blue-600">Applying filters...</span>
+            </div>
+          </div>
+        )}
+
         {/* Posts Feed */}
-        <div className="space-y-4">
-          {filteredPosts.length === 0 ? (
+        <div className={`space-y-4 ${filterLoading ? 'opacity-50' : ''}`}>
+          {posts.length === 0 && !filterLoading ? (
             <div className="text-center py-12">
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               <h3 className="mt-2 text-sm font-medium text-gray-900">
-                {searchTerm || filterBy !== 'all' ? 'No posts match your filters' : 'No posts yet'}
+                {filterBy !== 'all' ? 'No posts match your filter' : 'No posts yet'}
               </h3>
               <p className="mt-1 text-sm text-gray-500">
-                {searchTerm || filterBy !== 'all'
-                  ? 'Try adjusting your search or filters to see more posts.'
+                {filterBy !== 'all'
+                  ? 'Try changing your filter to see more posts.'
                   : 'Be the first to share something with your friends!'
                 }
               </p>
-              {(searchTerm || filterBy !== 'all') && (
+              {filterBy !== 'all' && (
                 <button
                   onClick={clearFilters}
                   className="mt-3 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700"
                 >
-                  Clear filters
+                  Clear filter
                 </button>
               )}
             </div>
           ) : (
-            filteredPosts.map((post) => (
+            posts.map((post) => (
               <PostCard
                 key={post._id}
                 post={post}
@@ -640,26 +590,16 @@ const Feed = () => {
           )}
         </div>
 
-        {/* Load More Button */}
-        {hasMore && posts.length > 0 && (
-          <div className="mt-8 text-center">
-            <button
-              onClick={loadMorePosts}
-              disabled={loadingMore}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loadingMore ? (
-                <div className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Loading...
-                </div>
-              ) : (
-                'Load More Posts'
-              )}
-            </button>
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div className="mt-8">
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.pages}
+              onPageChange={goToPage}
+              onPreviousPage={goToPreviousPage}
+              onNextPage={goToNextPage}
+            />
           </div>
         )}
       </div>

@@ -147,7 +147,21 @@ class ApiClient {
    * GET request
    */
   async get(endpoint, options = {}) {
-    return this.request(endpoint, { ...options, method: 'GET' });
+    const { params, ...otherOptions } = options;
+    
+    // Build query string from params
+    let url = endpoint;
+    if (params && Object.keys(params).length > 0) {
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+      url += `?${searchParams.toString()}`;
+    }
+    
+    return this.request(url, { ...otherOptions, method: 'GET' });
   }
 
   /**
